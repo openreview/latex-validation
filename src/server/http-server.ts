@@ -5,76 +5,34 @@ import { koaBody } from 'koa-body';
 import { Server } from 'http';
 import axios from 'axios';
 
-import {
-  putStrLn,
-  stripMargin,
-  getServiceLogger,
-  prettyPrint
-} from '@watr/commonlib';
 
 import fs from 'fs-extra';
 import Application from 'koa';
+import { prettyPrint, putStrLn } from '~/util/pretty-print';
 
-const withFields = stripMargin(`
-|<html>
-|  <head>
-|    <meta name="citation_author" content="Holte, Robert C." />
-|    <meta name="citation_author" content="Burch, Neil" />
-|    <meta name="citation_title" content="Automatic move pruning for single-agent search" />
-|    <meta name="dc.Creator" content="Adam" />
-|    <meta name="dc.creator" content="adam" />
-|    <meta property="og:description" content="success: We consider a new learning model in which a joint distributi" />
-|  </head>
-|
-|  <body>
-|    <section class="Abstract" id="Abs1" tabindex="-1" lang="en" xml:lang="en">
-|      <h2 class="Heading">
-|        Abstract
-|      </h2>
-|      <p class="Para">
-|        success: We present
-|      </p>
-|    </section>
-|    <a class="show-pdf" href="/success:pdf">PDF</a>
-|
-|    <div class="Abstracts u-font-serif" id="abstracts">
-|        <div class="abstract author" id="aep-abstract-id6">
-|            <h2 class="section-title u-h3 u-margin-l-top u-margin-xs-bottom">
-|                Abstract
-|            </h2>
-|            <div id="aep-abstract-sec-id7">
-|                <p>
-|                    success1
-|                </p>
-|                <p>
-|                    success2
-|                </p>
-|            </div>
-|        </div>
-|    </div>
-|
-|  </body>
-|</html>
-`);
 
-const withoutFields = `
-<html> <head> </head> <body> </body> </html>
-`;
+export function stripMargin(block: string): string {
+  const lines = block.split('\n');
+  const stripped = stripMargins(lines);
+  return stripped.join('\n');
+}
 
-const htmlSamples: Record<string, string> = {
-  withFields,
-  withoutFields,
-  custom404: '<html><body>404 Not Found</body></html>'
-};
-
-const log = getServiceLogger('test-server');
+export function stripMargins(lines: string[]): string[] {
+  return _
+    .map(lines, l => {
+      if (/^ *\|/.test(l)) {
+        return l.slice(l.indexOf('|') + 1);
+      }
+      return l;
+    });
+}
 
 
 function htmlRouter(): Router<Koa.DefaultState, Koa.DefaultContext> {
   const router = new Router({ routerPath: '/echo' });
 
   router.get('/echo', async (ctx: Context) => {
-    log.info(`${ctx.method} ${ctx.path}`);
+    // putStrLn(`${ctx.method} ${ctx.path}`);
     const { response } = ctx;
     const query = ctx.query;
     response.type = 'application/json';
@@ -84,7 +42,7 @@ function htmlRouter(): Router<Koa.DefaultState, Koa.DefaultContext> {
 
   router.get(/[/]htmls[/].*/, async (ctx: Context, next: () => Promise<any>) => {
     const { response, path } = ctx;
-    log.info(`html router; ${path}`);
+    // putStrLn(`html router; ${path}`);
     prettyPrint({ testServer: path });
     const pathTail = path.slice('/htmls/'.length);
     // const pathTail = path.slice(1);
@@ -94,7 +52,7 @@ function htmlRouter(): Router<Koa.DefaultState, Koa.DefaultContext> {
 
     response.type = 'html';
     response.status = Number.parseInt(status, 10);
-    response.body = htmlSamples[respKey] || 'Unknown';
+    // response.body = htmlSamples[respKey] || 'Unknown';
     await next();
   });
 
@@ -127,7 +85,7 @@ export async function* withServerGen(
 
   const server = await new Promise<Server>((resolve) => {
     const server = app.listen(port, () => {
-      log.info(`Koa is listening to http://localhost:${port}`);
+      putStrLn(`Koa is listening to http://localhost:${port}`);
       resolve(server);
     });
   });
@@ -200,7 +158,7 @@ export async function startTestServer(): Promise<Server> {
 
   return new Promise((resolve) => {
     const server = app.listen(port, () => {
-      log.info(`Koa is listening to http://localhost:${port}`);
+      putStrLn(`Koa is listening to http://localhost:${port}`);
       resolve(server);
     });
   });

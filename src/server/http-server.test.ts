@@ -1,10 +1,8 @@
 import _ from 'lodash';
-import { respondWith, isGETEqual, withServerGen } from './test-http-server';
+import { respondWith, isGETEqual, withServerGen } from './http-server';
 
-import { setLogEnvLevel } from '@watr/commonlib';
 
 describe('REST Worker Endpoints', () => {
-  setLogEnvLevel('info');
 
   it('should use withServer() and properly shutdown', async () => {
     for await (const __ of withServerGen((r) => {
