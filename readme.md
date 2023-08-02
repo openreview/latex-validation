@@ -17,3 +17,7 @@ arbitrary latex fragment.
 ### Incomprehensible error messages
 The output of Tex's compiler can make  it difficult to understand the root cause
 of an issue. Some work might be needed to make the reported errors clearer.
+
+
+## TODO
+- [ ] cleanup output artifacts from tectonic

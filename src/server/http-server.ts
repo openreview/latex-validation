@@ -1,72 +1,17 @@
 import _ from 'lodash';
-import Koa, { Context } from 'koa';
+import Koa from 'koa';
 import Router from '@koa/router';
 import { koaBody } from 'koa-body';
+import json from 'koa-json';
 import { Server } from 'http';
 import axios from 'axios';
-
-
-import fs from 'fs-extra';
 import Application from 'koa';
 import { prettyPrint, putStrLn } from '~/util/pretty-print';
-
-
-export function stripMargin(block: string): string {
-  const lines = block.split('\n');
-  const stripped = stripMargins(lines);
-  return stripped.join('\n');
-}
-
-export function stripMargins(lines: string[]): string[] {
-  return _
-    .map(lines, l => {
-      if (/^ *\|/.test(l)) {
-        return l.slice(l.indexOf('|') + 1);
-      }
-      return l;
-    });
-}
-
-
-function htmlRouter(): Router<Koa.DefaultState, Koa.DefaultContext> {
-  const router = new Router({ routerPath: '/echo' });
-
-  router.get('/echo', async (ctx: Context) => {
-    // putStrLn(`${ctx.method} ${ctx.path}`);
-    const { response } = ctx;
-    const query = ctx.query;
-    response.type = 'application/json';
-    response.status = 200;
-    response.body = query || {};
-  })
-
-  router.get(/[/]htmls[/].*/, async (ctx: Context, next: () => Promise<any>) => {
-    const { response, path } = ctx;
-    // putStrLn(`html router; ${path}`);
-    prettyPrint({ testServer: path });
-    const pathTail = path.slice('/htmls/'.length);
-    // const pathTail = path.slice(1);
-    const [status, respKey, maybeTimeout] = pathTail.split(/~/);
-    const timeout = maybeTimeout ? Number.parseInt(maybeTimeout) : 0;
-    prettyPrint({ status, respKey, timeout });
-
-    response.type = 'html';
-    response.status = Number.parseInt(status, 10);
-    // response.body = htmlSamples[respKey] || 'Unknown';
-    await next();
-  });
-
-
-  return router;
-}
-
-
 
 
 export type WithServerCallbackArgs = {
   server: Server;
 };
-
 
 export async function* withServerGen(
   setup: (router: Router) => void,
@@ -74,11 +19,12 @@ export async function* withServerGen(
   const routes = new Router();
   const app = new Koa();
   app.use(koaBody());
+  app.use(json({ pretty: false }));
 
   setup(routes);
+
   // TODO config port
   const port = 9100;
-
 
   app.use(routes.routes());
   app.use(routes.allowedMethods());
@@ -92,7 +38,7 @@ export async function* withServerGen(
   try {
     yield server;
   } finally {
-    await closeTestServer(server);
+    await closeServer(server);
   }
 }
 
@@ -146,34 +92,34 @@ export function respondWithHtml(
   };
 }
 
-export async function startTestServer(): Promise<Server> {
-  const app = new Koa();
+// export async function startTestServer(): Promise<Server> {
+//   const app = new Koa();
 
-  const port = 9100;
+//   const port = 9100;
 
-  const htmlRoutes = htmlRouter();
+//   const htmlRoutes = htmlRouter();
 
-  app.use(htmlRoutes.routes());
-  app.use(htmlRoutes.allowedMethods());
+//   app.use(htmlRoutes.routes());
+//   app.use(htmlRoutes.allowedMethods());
 
+//   return new Promise((resolve) => {
+//     const server = app.listen(port, () => {
+//       putStrLn(`Koa is listening to http://localhost:${port}`);
+//       resolve(server);
+//     });
+//   });
+// }
+
+// export async function resetTestServer(workingDir: string): Promise<Server> {
+//   fs.emptyDirSync(workingDir);
+//   fs.removeSync(workingDir);
+//   fs.mkdirSync(workingDir);
+//   return startTestServer();
+// }
+
+export async function closeServer(server: Server | undefined): Promise<void> {
+  if (server === undefined) return;
   return new Promise((resolve) => {
-    const server = app.listen(port, () => {
-      putStrLn(`Koa is listening to http://localhost:${port}`);
-      resolve(server);
-    });
-  });
-}
-
-export async function resetTestServer(workingDir: string): Promise<Server> {
-  fs.emptyDirSync(workingDir);
-  fs.removeSync(workingDir);
-  fs.mkdirSync(workingDir);
-  return startTestServer();
-}
-
-export async function closeTestServer(server: Server | undefined): Promise<void> {
-  return new Promise((resolve) => {
-    if (server === undefined) return;
     server.on('close', () => {
       putStrLn('test server closed.');
     });
@@ -186,3 +132,35 @@ export async function closeTestServer(server: Server | undefined): Promise<void>
     });
   });
 }
+
+// function htmlRouter(): Router<Koa.DefaultState, Koa.DefaultContext> {
+//   const router = new Router({ routerPath: '/echo' });
+
+//   router.get('/echo', async (ctx: Context) => {
+//     // putStrLn(`${ctx.method} ${ctx.path}`);
+//     const { response } = ctx;
+//     const query = ctx.query;
+//     response.type = 'application/json';
+//     response.status = 200;
+//     response.body = query || {};
+//   })
+
+//   router.get(/[/]htmls[/].*/, async (ctx: Context, next: () => Promise<any>) => {
+//     const { response, path } = ctx;
+//     // putStrLn(`html router; ${path}`);
+//     prettyPrint({ testServer: path });
+//     const pathTail = path.slice('/htmls/'.length);
+//     // const pathTail = path.slice(1);
+//     const [status, respKey, maybeTimeout] = pathTail.split(/~/);
+//     const timeout = maybeTimeout ? Number.parseInt(maybeTimeout) : 0;
+//     prettyPrint({ status, respKey, timeout });
+
+//     response.type = 'html';
+//     response.status = Number.parseInt(status, 10);
+//     // response.body = htmlSamples[respKey] || 'Unknown';
+//     await next();
+//   });
+
+
+//   return router;
+// }

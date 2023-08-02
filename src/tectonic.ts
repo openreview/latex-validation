@@ -44,11 +44,11 @@
 *
 **/
 import { spawn } from 'node:child_process';
-import { putStrLn } from './util/pretty-print';
 
-export type ProcOutput = {
-  stdout: string[],
-  stderr: string[],
+export interface ProcOutput {
+  exitCode: number;
+  stdout: string[];
+  stderr: string[];
 }
 
 function nonEmptyLines(input: string): string[] {
@@ -58,8 +58,9 @@ function reflowLines(input: string[]): string[] {
   return nonEmptyLines(input.join(''));
 }
 
-export async function execTectonic(input: string) {
-  return new Promise<ProcOutput>((resolve, reject) => {
+export async function execTectonic(input: string): Promise<ProcOutput> {
+  return new Promise<ProcOutput>((resolve) => {
+    let exitCode = -1;
     const stdoutBuf: string[] = []
     const stderrBuf: string[] = []
     let stdoutClosed = false;
@@ -69,11 +70,11 @@ export async function execTectonic(input: string) {
       if (stdoutClosed && stderrClosed && procClosed) {
         const stdout = reflowLines(stdoutBuf);
         const stderr = reflowLines(stderrBuf);
-        resolve({ stdout, stderr });
+        resolve({ exitCode, stdout, stderr });
       }
     }
 
-    const command = spawn('tectonic', ['-p', '-'])
+    const command = spawn('tectonic', ['-'])
 
     command.stdout.on('data', (output: any) => {
       stdoutBuf.push(output.toString());
@@ -89,10 +90,8 @@ export async function execTectonic(input: string) {
       stdoutClosed = true;
       resolveOnClosed();
     });
-    command.on('close', (code) => {
-      if (code !== 0) {
-        putStrLn(`Tectonic exited with code ${code}`);
-      }
+    command.on('close', (code?: number) => {
+      exitCode = code || -1;
       procClosed = true;
       resolveOnClosed();
     });

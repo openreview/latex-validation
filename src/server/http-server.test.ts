@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { respondWith, isGETEqual, withServerGen } from './http-server';
 
 
-describe('REST Worker Endpoints', () => {
+describe('HTTP Server', () => {
 
   it('should use withServer() and properly shutdown', async () => {
     for await (const __ of withServerGen((r) => {
