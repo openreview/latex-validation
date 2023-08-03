@@ -11,6 +11,7 @@ describe('Tectonic Execution', () => {
     return examples || [];
   }
 
+  // it('should record process spawn/runtime', async () => {});
   it('should pass valid examples', async () => {
     // N.B., only running a few examples as it's a very long runtime to test all of them
     const examples = latexExamples();

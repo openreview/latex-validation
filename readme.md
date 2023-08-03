@@ -19,5 +19,13 @@ The output of Tex's compiler can make  it difficult to understand the root cause
 of an issue. Some work might be needed to make the reported errors clearer.
 
 
-## TODO
-- [ ] cleanup output artifacts from tectonic
+## Next Steps
+- [ ] cleanup output artifacts from tectonic (pdf file is generated)
+- [ ] document installation
+- [ ] improve error messages, esp for longer fragments
+    - [ ] split fragments into smallest chunks, one per line, to improve line error reporting
+- [ ] compile a better list of positive and negative examples of markup
+- [ ] check for zombie processes on error
+- [ ] store error-contained submitted examples locally, for evaluation and improving system accuracy
+- [ ] write installer/run script in ./bin/run
+- [ ] figure out how to dynamically alter the tex wrapper  document with required \usepackage directives
