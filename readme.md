@@ -4,10 +4,11 @@ Utilities to validate the syntax of Latex fragments.
 Uses `tectonic` to run compilation.
 
 ## Installation
-- install tectonic, instructions are here:
+- Install tectonic, as per instructions here:
    https://tectonic-typesetting.github.io/en-US/install.html
 
 - Build and run the server
+    > npm install
     > npm run build
     > node dist/main.js run-server
 
