@@ -8,10 +8,11 @@ Uses `tectonic` to run compilation.
    https://tectonic-typesetting.github.io/en-US/install.html
 
 - Build and run the server
-    > npm install
-    > npm run build
-    > node dist/main.js run-server
-
+```
+> npm install
+> npm run build
+> node dist/main.js run-server
+```
 
 ## Usage
 The server listens on localhost:9100 for POSTs to REST endpoint /latex/fragment
@@ -19,13 +20,16 @@ The expected format of the POST body is: {latex: 'some latex fragment'}
 
 Some example curl commands:
 
+```
 > curl -d 'latex=Understanding $\boldsymbol{\delta}$-Function' http://localhost:9100/latex/fragment
 > {"status": "ok"}
+```
 
 Fail if \boldsymbol is misspelled:
+```
 > curl -d 'latex=Understanding $\bldsym{\delta}$-Function' http://localhost:9100/latex/fragment
 > {"status":"error","message":"Undefined control sequence"}
-
+```
 
 ## Issues
 
