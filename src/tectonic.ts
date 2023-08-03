@@ -59,15 +59,18 @@ function reflowLines(input: string[]): string[] {
   return nonEmptyLines(input.join(''));
 }
 
-export async function execTectonic(input: string): Promise<ProcOutput> {
+export async function execTectonic(input: string, reportTiming: boolean=true): Promise<ProcOutput> {
   return new Promise<ProcOutput>((resolve) => {
-    const timeStartMS = (new Date()).getTime();
     let exitCode = -1;
     const stdoutBuf: string[] = []
     const stderrBuf: string[] = []
     let stdoutClosed = false;
     let stderrClosed = false;
     let procClosed = false;
+
+
+    ////////
+    // Timer functionality
     const times: Record<string, number[]> = {
       timeToClose: [],
       timeToDisconnect: [],
@@ -81,6 +84,15 @@ export async function execTectonic(input: string): Promise<ProcOutput> {
       'stderr.close': [],
     };
 
+    const timeStartMS = (new Date()).getTime();
+    function recordTimeFromStart(key: string) {
+      if (!reportTiming) return;
+      const nowMS = (new Date()).getTime();
+      times[key].push(nowMS - timeStartMS);
+    }
+    // /Timer
+    ////////
+
     function resolveOnClosed() {
       if (stdoutClosed && stderrClosed && procClosed) {
         const stdout = reflowLines(stdoutBuf);
@@ -90,62 +102,46 @@ export async function execTectonic(input: string): Promise<ProcOutput> {
       }
     }
 
-    // const command = spawn('tectonic', ['--chatter', 'minimal', '-']);
     const command = spawn('tectonic', ['-']);
 
     command.on('close', (code?: number) => {
-      const nowMS = (new Date()).getTime();
-      times['timeToClose'].push(nowMS - timeStartMS);
+      recordTimeFromStart('timeToClose')
       exitCode = code || -1;
       procClosed = true;
       resolveOnClosed();
     });
     command.on('disconnect', () => {
-      const nowMS = (new Date()).getTime();
-      times['timeToDisconnect'].push(nowMS - timeStartMS);
-      // putStrLn('disconnect');
+      recordTimeFromStart('timeToDisconnect');
     });
     command.on('error', (error: Error) => {
-      const nowMS = (new Date()).getTime();
-      times['timeToError'].push(nowMS - timeStartMS);
-      // putStrLn('error');
+      recordTimeFromStart('timeToError');
     });
     command.on('exit', (code: number, signal: string) => {
-      const nowMS = (new Date()).getTime();
-      times['timeToExit'].push(nowMS - timeStartMS);
-      // putStrLn('exit');
+      recordTimeFromStart('timeToExit');
     });
     command.on('message', (msg: any, sendHandle: SendHandle) => {
-      const nowMS = (new Date()).getTime();
-      times['timeToMessage'].push(nowMS - timeStartMS);
-      // putStrLn('message');
+      recordTimeFromStart('timeToMessage');
     });
     command.on('spawn', () => {
-      const nowMS = (new Date()).getTime();
-      times['timeToSpawn'].push(nowMS - timeStartMS);
-      // putStrLn('spawn');
+      recordTimeFromStart('timeToSpawn');
     });
 
 
     command.stdout.on('data', (output: any) => {
-      const nowMS = (new Date()).getTime();
-      times['stdout.data'].push(nowMS - timeStartMS);
+      recordTimeFromStart('stdout.data');
       stdoutBuf.push(output.toString());
     });
     command.stderr.on('data', (output: any) => {
-      const nowMS = (new Date()).getTime();
-      times['stderr.data'].push(nowMS - timeStartMS);
+      recordTimeFromStart('stderr.data');
       stderrBuf.push(output.toString());
     });
     command.stderr.on('close', () => {
-      const nowMS = (new Date()).getTime();
-      times['stderr.close'].push(nowMS - timeStartMS);
+      recordTimeFromStart('stderr.close');
       stderrClosed = true;
       resolveOnClosed();
     });
     command.stdout.on('close', () => {
-      const nowMS = (new Date()).getTime();
-      times['stdout.close'].push(nowMS - timeStartMS);
+      recordTimeFromStart('stdout.close');
       stdoutClosed = true;
       resolveOnClosed();
     });
