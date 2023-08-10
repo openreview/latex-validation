@@ -1,3 +1,4 @@
+import { prepareLatexFragment } from './latex/fragments';
 import { isSuccess, validateLatexFragment } from './latex/validate';
 import { withRestServer } from './server/rest-api';
 import { registerCmd, YArgsT, runRegisteredCmds, YArgs, opt } from './util/arglib';
@@ -28,6 +29,7 @@ export function registerCLICommands(yargv: YArgsT) {
         });
       }
     });
+
   registerCmd(
     yargv,
     'validate',
@@ -50,6 +52,25 @@ export function registerCLICommands(yargv: YArgsT) {
       return;
     }
     putStrLn('Ok');
+  });
+
+  registerCmd(
+    yargv,
+    'make-document',
+    'Create a fully-formed wrapped document from a fragment',
+    opt.file('latex-packages'),
+    opt.str('fragment')
+  )(async (args) => {
+    const { latexPackages, fragment } = args;
+
+    const packageList = fileLines(latexPackages);
+    if (!packageList) {
+      putStrLn(`Error, package list could not be loaded from ${latexPackages}`);
+      return;
+    }
+    const { document, fragmentLinesNumbered } = prepareLatexFragment({ fragment, packages: packageList });
+    putStrLn(document);
+
   });
 }
 

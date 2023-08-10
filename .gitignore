@@ -83,3 +83,4 @@ config-*.json
 py-venv
 
 texput.pdf
+.auctex-auto/
