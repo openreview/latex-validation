@@ -10,12 +10,17 @@ describe('Tectonic Execution', () => {
     const examples = fileLines('./test/latex-examples.txt');
     return examples || [];
   }
+  const latexPackageFile = './resources/latex-packages.txt';
+  const latexPackages = fileLines(latexPackageFile);
+  if (!latexPackages) {
+    throw new Error(`Loading ${latexPackageFile}: not found`);
+  }
 
   it('should pass valid examples', async () => {
     // N.B., only running a few examples as it's a very long runtime to test all of them
     const examples = latexExamples();
     for await (const example of examples.slice(0, 3)) {
-      const { document, fragmentLinesNumbered  } = prepareLatexFragment({ fragment: example });
+      const { document, fragmentLinesNumbered  } = prepareLatexFragment({ fragment: example, packages: latexPackages });
 
 
       const { stderr } = await execTectonic(document);

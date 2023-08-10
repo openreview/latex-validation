@@ -12,10 +12,7 @@
   "rules": {
     "semi": "off",
     "indent": "off",
-    "@typescript-eslint/indent": [
-      "error",
-      2
-    ],
+    "@typescript-eslint/indent": "off",
     "@typescript-eslint/no-explicit-any": [
       "off"
     ],

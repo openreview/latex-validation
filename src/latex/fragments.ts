@@ -27,30 +27,33 @@ interface LatexFragment extends FormattedInput {
 
 type PrepareLatexFragmentArgs = {
   fragment: string,
+  packages: string[]
   // split one word/line
 };
 
 export function prepareLatexFragment({
-  fragment
+  fragment,
+  packages
 }: PrepareLatexFragmentArgs): LatexFragment {
   const formatted = formatInputLines(fragment)
-  const document = wrapLatex(formatted.fragmentLines);
+  const document = wrapLatex(formatted.fragmentLines, packages);
 
   return { document, ...formatted };
 }
 
-function wrapLatex(fragment: string): string {
-  // \\documentclass[a4paper]{article}
-  const latexDoc = `
-${docHeaders}
-\\begin{document}
-{
- ${fragment}
+function wrapLatex(fragment: string, packages: string[]): string {
+  const docLines = [
+    '\\documentclass[11pt,oneside]{book}',
+    ...packages,
+    '\\begin{document}',
+    '{',
+    fragment,
+    '}',
+    '\\end{document}',
+  ];
+  return docLines.join('\n');
 }
-\\end{document}
-`;
-  return latexDoc;
-}
+
 
 interface FormattedInput {
   fragmentLines: string;

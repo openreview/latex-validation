@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { withRestServer } from './rest-api';
 import axios from 'axios';
-import { nonEmptyLines } from '~/util/files';
+import { fileLines, nonEmptyLines } from '~/util/files';
 import { stripMargin } from '~/util/string-utils';
 import { prettyPrint } from '~/util/pretty-print';
 
@@ -14,8 +14,13 @@ describe('REST Endpoints', () => {
 | \\caption{Energy: \\(e=mc^2\\)}
 |`));
 
+  const latexPackageFile = './resources/latex-packages.txt';
+  const latexPackages = fileLines(latexPackageFile);
+  if (!latexPackages) {
+    throw new Error(`Loading ${latexPackageFile}: not found`);
+  }
   it('should use withServer() and properly shutdown', async () => {
-    for await (const __ of withRestServer()) {
+    for await (const __ of withRestServer(latexPackages)) {
       const url = 'http://localhost:9100/latex/fragment';
       for await (const example of examples) {
         const resp = await axios.post(url, {latex: example});

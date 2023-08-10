@@ -1,4 +1,5 @@
 import { execTectonic } from '~/tectonic';
+import { putStrLn } from '~/util/pretty-print';
 import { prepareLatexFragment } from './fragments';
 
 function parseIntOrElse(s: string, fallback: number): number {
@@ -51,8 +52,10 @@ function filterErrorLines(lines: string[]): Error[] {
   });
 }
 
-export async function validateLatexFragment(fragment: string): Promise<Validation> {
-  const { document, fragmentLinesNumbered } = prepareLatexFragment({ fragment });
+export async function validateLatexFragment(fragment: string, packages: string[]): Promise<Validation> {
+  const { document, fragmentLinesNumbered } = prepareLatexFragment({ fragment, packages });
+  putStrLn('Prepared document is')
+  putStrLn(document)
 
   const { exitCode, stderr } = await execTectonic(document)
   const errors = filterErrorLines(stderr);

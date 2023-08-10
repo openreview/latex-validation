@@ -1,19 +1,55 @@
+import { isSuccess, validateLatexFragment } from './latex/validate';
 import { withRestServer } from './server/rest-api';
-import { registerCmd, YArgsT, runRegisteredCmds, YArgs } from './util/arglib';
+import { registerCmd, YArgsT, runRegisteredCmds, YArgs, opt } from './util/arglib';
+import { fileLines } from './util/files';
+import { putStrLn } from './util/pretty-print';
 
 export function registerCLICommands(yargv: YArgsT) {
   registerCmd(
     yargv,
     'run-server',
     'Run REST API Server',
-  )(async () => {
-    for await (const server of withRestServer()) {
-      await new Promise<void>((resolve) => {
-        server.on('close', () => {
-          resolve();
+    opt.existingFile('latex-packages')
+  )(
+    async (args) => {
+      const { latexPackages } = args;
+
+      const packageList = fileLines(latexPackages);
+      if (!packageList) {
+        putStrLn(`Error, package list could not be loaded from ${latexPackages}`);
+        return;
+      }
+
+      for await (const server of withRestServer(packageList)) {
+        await new Promise<void>((resolve) => {
+          server.on('close', () => {
+            resolve();
+          });
         });
-      });
+      }
+    });
+  registerCmd(
+    yargv,
+    'validate',
+    'Validate a fragment',
+    opt.file('latex-packages'),
+    opt.str('fragment')
+  )(async (args) => {
+    const { latexPackages, fragment } = args;
+
+    const packageList = fileLines(latexPackages);
+    if (!packageList) {
+      putStrLn(`Error, package list could not be loaded from ${latexPackages}`);
+      return;
     }
+
+    const result = await validateLatexFragment(fragment, packageList);
+    if (!isSuccess(result)) {
+      const message = result.errors.map(e => e.message).join('\n');
+      putStrLn(message)
+      return;
+    }
+    putStrLn('Ok');
   });
 }
 
