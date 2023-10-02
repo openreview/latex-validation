@@ -9,7 +9,6 @@ import { Server } from 'http';
 
 
 export async function* withRestServer(packageList: string[]): AsyncGenerator<Server, void, void> {
-
   for await (const server of withServerGen(setupRestRoutes(packageList))) {
     yield server;
   }
