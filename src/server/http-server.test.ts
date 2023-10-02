@@ -9,8 +9,8 @@ describe('HTTP Server', () => {
       r.get('/bar', respondWith({ bar: 'foo' }))
       r.get('/foo', respondWith({ foo: 'bar' }))
     })) {
-      await isGETEqual('http://localhost:9100/foo', { foo: 'bar' })
-      await isGETEqual('http://localhost:9100/bar', { bar: 'foo' })
+      await isGETEqual('http://localhost:8080/foo', { foo: 'bar' })
+      await isGETEqual('http://localhost:8080/bar', { bar: 'foo' })
     }
 
   });
