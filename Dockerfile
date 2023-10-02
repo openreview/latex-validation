@@ -47,6 +47,6 @@ RUN cd /home/latex-validation \
 
 RUN node dist/main.js validate --latex-packages resources/latex-packages.txt --fragment 'Init $\textbf{latex packages}$'
 
-EXPOSE 9100
+EXPOSE 8080
 
 CMD ["node", "dist/main.js", "run-server", "--latex-packages", "resources/latex-packages.txt"]

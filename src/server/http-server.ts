@@ -23,7 +23,6 @@ export async function* withServerGen(
 
   setup(routes);
 
-  // TODO config port
   const port = process.env.PORT || 8080;
 
   app.use(routes.routes());
@@ -92,31 +91,6 @@ export function respondWithHtml(
   };
 }
 
-// export async function startTestServer(): Promise<Server> {
-//   const app = new Koa();
-
-//   const port = process.env.PORT || 8080;
-
-//   const htmlRoutes = htmlRouter();
-
-//   app.use(htmlRoutes.routes());
-//   app.use(htmlRoutes.allowedMethods());
-
-//   return new Promise((resolve) => {
-//     const server = app.listen(port, () => {
-//       putStrLn(`Koa is listening to http://localhost:${port}`);
-//       resolve(server);
-//     });
-//   });
-// }
-
-// export async function resetTestServer(workingDir: string): Promise<Server> {
-//   fs.emptyDirSync(workingDir);
-//   fs.removeSync(workingDir);
-//   fs.mkdirSync(workingDir);
-//   return startTestServer();
-// }
-
 export async function closeServer(server: Server | undefined): Promise<void> {
   if (server === undefined) return;
   return new Promise((resolve) => {
@@ -132,35 +106,3 @@ export async function closeServer(server: Server | undefined): Promise<void> {
     });
   });
 }
-
-// function htmlRouter(): Router<Koa.DefaultState, Koa.DefaultContext> {
-//   const router = new Router({ routerPath: '/echo' });
-
-//   router.get('/echo', async (ctx: Context) => {
-//     // putStrLn(`${ctx.method} ${ctx.path}`);
-//     const { response } = ctx;
-//     const query = ctx.query;
-//     response.type = 'application/json';
-//     response.status = 200;
-//     response.body = query || {};
-//   })
-
-//   router.get(/[/]htmls[/].*/, async (ctx: Context, next: () => Promise<any>) => {
-//     const { response, path } = ctx;
-//     // putStrLn(`html router; ${path}`);
-//     prettyPrint({ testServer: path });
-//     const pathTail = path.slice('/htmls/'.length);
-//     // const pathTail = path.slice(1);
-//     const [status, respKey, maybeTimeout] = pathTail.split(/~/);
-//     const timeout = maybeTimeout ? Number.parseInt(maybeTimeout) : 0;
-//     prettyPrint({ status, respKey, timeout });
-
-//     response.type = 'html';
-//     response.status = Number.parseInt(status, 10);
-//     // response.body = htmlSamples[respKey] || 'Unknown';
-//     await next();
-//   });
-
-
-//   return router;
-// }
