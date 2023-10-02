@@ -21,7 +21,7 @@ describe('REST Endpoints', () => {
   }
   it('should use withServer() and properly shutdown', async () => {
     for await (const __ of withRestServer(latexPackages)) {
-      const url = 'http://localhost:9100/latex/fragment';
+      const url = 'http://localhost:8080/latex/fragment';
       for await (const example of examples) {
         const resp = await axios.post(url, {latex: example});
         const data = resp.data;

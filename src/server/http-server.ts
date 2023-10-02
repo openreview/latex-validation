@@ -24,7 +24,7 @@ export async function* withServerGen(
   setup(routes);
 
   // TODO config port
-  const port = 9100;
+  const port = process.env.PORT || 8080;
 
   app.use(routes.routes());
   app.use(routes.allowedMethods());
@@ -95,7 +95,7 @@ export function respondWithHtml(
 // export async function startTestServer(): Promise<Server> {
 //   const app = new Koa();
 
-//   const port = 9100;
+//   const port = process.env.PORT || 8080;
 
 //   const htmlRoutes = htmlRouter();
 
